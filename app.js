@@ -11,6 +11,12 @@ const express = require("express");
 
 const app = express();
 
+// Configure CORS
+app.use(cors({
+    origin: 'http://localhost:5173', // Allow your frontend origin
+    credentials: true, // If you need to send cookies with your requests
+  }));
+
 // ℹ️ This function is getting exported from the config folder. It runs most pieces of middleware
 require("./config")(app);
 
