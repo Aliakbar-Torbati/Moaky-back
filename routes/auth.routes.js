@@ -46,12 +46,17 @@ router.post("/signup", (req, res, next) => {
   // }
 
   // Check the users collection if a user with the same email already exists
-  User.findOne({ email })
+  User.findOne({ $or: [{ email }, { name }] })
     .then((foundUser) => {
-      // If the user with the same email already exists, send an error response
+      // If the user with the same email or the same username already exists, send an error response
       if (foundUser) {
-        res.status(400).json({ message: "User already exists." });
-        return;
+      // Check if it's the email or the name that is taken
+      if (foundUser.email === email) {
+        res.status(400).json({ message: "Email already exists." });
+      } else if (foundUser.name === name) {
+        res.status(400).json({ message: "Username already exists." });
+      }
+      return;
       }
 
       // If email is unique, proceed to hash the password
@@ -108,7 +113,7 @@ router.post("/login", (req, res, next) => {
         // Create a JSON Web Token and sign it
         const authToken = jwt.sign(payload, process.env.TOKEN_SECRET, {
           algorithm: "HS256",
-          expiresIn: "6h",
+          expiresIn: "24h",
         });
 
         // Send the token as the response
