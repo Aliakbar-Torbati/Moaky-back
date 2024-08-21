@@ -32,6 +32,8 @@ app.use("/auth", authRoutes);
 const newsletterEmailsRoutes = require("./routes/newsletterEmails.routes.js");
 app.use("/newsletter", newsletterEmailsRoutes);
 
+const contactFormRoutes = require("./routes/contactForm.routes.js");
+app.use("/contact", contactFormRoutes);
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes
 require("./error-handling")(app);
 

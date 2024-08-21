@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-// Require the User model in order to interact with the database
+// Require a model in order to interact with the database
 const NewsletterEmail = require("../models/Newsletter.model");
 
 // POST /newsletter/signup  - Creates a new email in the database
