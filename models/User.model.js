@@ -19,6 +19,16 @@ const userSchema = new Schema(
       required: [true, "Username is required."],
       unique: true,
     },
+    verificationToken: {
+      type: String,
+    },
+    isVerified: {
+      type: Boolean,
+    },
+    verificationTokenExpires: {
+      type: Number,
+    },
+
   },
   {
     // this second object adds extra properties: `createdAt` and `updatedAt`

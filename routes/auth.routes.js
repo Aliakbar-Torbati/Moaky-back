@@ -1,103 +1,148 @@
 const express = require("express");
 const router = express.Router();
-
-// ℹ️ Handles password encryption
 const bcrypt = require("bcrypt");
-
-// ℹ️ Handles password encryption
 const jwt = require("jsonwebtoken");
-
-// Require the User model in order to interact with the database
 const User = require("../models/User.model");
-
-// Require necessary (isAuthenticated) middleware in order to control access to specific routes
 const { isAuthenticated } = require("../middleware/jwt.middleware.js");
+const crypto = require("crypto");
+const nodemailer = require("nodemailer");
 
-// How many rounds should bcrypt run the salt (default - 10 rounds)
 const saltRounds = 10;
 
-// POST /auth/signup  - Creates a new user in the database
+// POST /auth/signup - Creates a new user in the database
 router.post("/signup", (req, res, next) => {
   const { email, password, name } = req.body;
-  console.log("user created",req.body);
-  
 
-  // Check if email or password or name are provided as empty strings
+  // Check if email, password, or name are provided as empty strings
   if (email === "" || password === "" || name === "") {
-    res.status(400).json({ message: "Provide email, password and name" });
-    return;
+    return res
+      .status(400)
+      .json({ message: "Provide email, password, and name" });
   }
 
-  // This regular expression check that the email is of a valid format
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  // Regular expression to check if the email is in a valid format
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   if (!emailRegex.test(email)) {
-    res.status(400).json({ message: "Provide a valid email address." });
-    return;
+    return res.status(400).json({ message: "Provide a valid email address." });
   }
 
-  // This regular expression checks password for special characters and minimum length
-  // const passwordRegex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
-  // if (!passwordRegex.test(password)) {
-  //   res.status(400).json({
-  //     message:
-  //       "Password must have at least 6 characters and contain at least one number, one lowercase and one uppercase letter.",
-  //   });
-  //   return;
-  // }
+  // Generate a unique verification token
+  const token = crypto.randomBytes(32).toString("hex");
 
-  // Check the users collection if a user with the same email already exists
+  // Check the users collection if a user with the same email or username exists
   User.findOne({ $or: [{ email }, { name }] })
     .then((foundUser) => {
-      // If the user with the same email or the same username already exists, send an error response
       if (foundUser) {
-      // Check if it's the email or the name that is taken
-      if (foundUser.email === email) {
-        res.status(400).json({ message: "Email already exists." });
-      } else if (foundUser.name === name) {
-        res.status(400).json({ message: "Username already exists." });
-      }
-      return;
+        // Email or username already exists
+        if (foundUser.email === email) {
+          return res.status(400).json({ message: "Email already exists." });
+        } else if (foundUser.name === name) {
+          return res.status(400).json({ message: "Username already exists." });
+        }
       }
 
-      // If email is unique, proceed to hash the password
+      // If email and username are unique, hash the password
       const salt = bcrypt.genSaltSync(saltRounds);
       const hashedPassword = bcrypt.hashSync(password, salt);
 
-      // Create the new user in the database
-      // We return a pending promise, which allows us to chain another `then`
-      return User.create({ email, password: hashedPassword, name });
+      // Create a new user in the database
+      return User.create({
+        email,
+        password: hashedPassword,
+        name,
+        verificationToken: token,
+        isVerified: false,
+        verificationTokenExpires: Date.now() + 3600000, // Token expires in 1 hour
+      });
     })
     .then((createdUser) => {
-      // Deconstruct the newly created user object to omit the password
-      // We should never expose passwords publicly
-      const { email, name, _id } = createdUser;
+      const transporter = nodemailer.createTransport({
+        service: "Gmail",
+        auth: {
+          user: "alitorbati1368@gmail.com",
+          pass: "evhu jydn prsl rnna",
+        },
+      });
 
-      // Create a new object that doesn't expose the password
-      const user = { email, name, _id };
+      const verificationUrl = `http://localhost:5005/auth/verify-email?token=${token}`;
 
-      // Send a json response containing the user object
-      res.status(201).json({ user: user });
+      const mailOptions = {
+        from: "alitorbati1368@gmail.com",
+        to: email,
+        subject: "Please verify your email",
+        html: `<p>Click the link below to verify your email:</p><a href="${verificationUrl}">${verificationUrl}</a>`,
+      };
+
+      // Send the verification email
+      return transporter.sendMail(mailOptions);
     })
-    .catch((err) => next(err)); // In this case, we send error handling to the error handling middleware.
+    .then(() => {
+      console.log("Verification email sent successfully.");
+      res
+        .status(201)
+        .json({ message: "Signup successful, verification email sent." });
+    })
+    .catch((err) => {
+      console.error("Error during signup or email sending:", err);
+      next(err); // In this case, we send error handling to the error handling middleware.
+    });
 });
 
-// POST  /auth/login - Verifies email and password and returns a JWT
+// resending end the verification email
+router.post("/resend-verification", (req, res) => {
+  const { email } = req.body;
+
+  User.findOne({ email })
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send("User not found.");
+      }
+      if (user.isVerified) {
+        return res.status(400).send("User is already verified.");
+      }
+
+      // Generate a new token and save it
+      const token = crypto.randomBytes(32).toString("hex");
+      user.verificationToken = token;
+      user.verificationTokenExpires = Date.now() + 3600000; // 1 hour
+
+      user.save().then(() => {
+        // Resend the verification email
+        const verificationUrl = `https://yourdomain.com/verify-email?token=${token}`;
+
+        const mailOptions = {
+          from: "your-email@gmail.com",
+          to: email,
+          subject: "Please verify your email",
+          html: `<p>Click the link below to verify your email:</p><a href="${verificationUrl}">${verificationUrl}</a>`,
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            return console.log(error);
+          }
+          res.send("A new verification email has been sent.");
+        });
+      });
+    })
+    .catch((err) => res.status(500).send(err));
+});
+
+// POST /auth/login - Verifies email and password and returns a JWT
 router.post("/login", (req, res, next) => {
   const { email, password } = req.body;
 
-  // Check if email or password are provided as empty string
+  // Check if email or password are provided as empty strings
   if (email === "" || password === "") {
-    res.status(400).json({ message: "Provide email and password." });
-    return;
+    return res.status(400).json({ message: "Provide email and password." });
   }
 
   // Check the users collection if a user with the same email exists
   User.findOne({ email })
     .then((foundUser) => {
       if (!foundUser) {
-        // If the user is not found, send an error response
-        res.status(401).json({ message: "User not found." });
-        return;
+        // User not found
+        return res.status(401).json({ message: "User not found." });
       }
 
       // Compare the provided password with the one saved in the database
@@ -117,23 +162,46 @@ router.post("/login", (req, res, next) => {
         });
 
         // Send the token as the response
-        res.status(200).json({ authToken: authToken });
+        res.status(200).json({ authToken });
       } else {
-        res.status(401).json({ message: "Unable to authenticate the user" });
+        res.status(401).json({ message: "Unable to authenticate the user." });
       }
     })
-    .catch((err) => next(err)); // In this case, we send error handling to the error handling middleware.
+    .catch((err) => next(err)); // Error handling
 });
 
-// GET  /auth/verify  -  Used to verify JWT stored on the client
+// GET /auth/verify - Used to verify JWT stored on the client
 router.get("/verify", isAuthenticated, (req, res, next) => {
-  // If JWT token is valid the payload gets decoded by the
-  // isAuthenticated middleware and is made available on `req.payload`
-  // console.log(`req.payload`, req.payload);
-console.log("verify", req.payload);
+  // The payload is available on `req.payload` because `isAuthenticated` middleware decoded the token
+  console.log("verify", req.payload);
 
   // Send back the token payload object containing the user data
   res.status(200).json(req.payload);
+});
+
+// GET /auth/verify-email - Used to verify the token which is sended by email to the user
+router.get("/verify-email", (req, res) => {
+  const token = req.query.token;
+
+  User.findOne({
+    verificationToken: token,
+    verificationTokenExpires: { $gt: Date.now() },
+  })
+    .then((user) => {
+      if (!user) {
+        return res.status(400).send("Token is invalid or has expired.");
+      }
+
+      // Mark the user as verified
+      user.isVerified = true;
+      user.verificationToken = undefined; // Remove the token once verified
+      user.verificationTokenExpires = undefined; // Clear the expiration
+
+      user.save().then(() => {
+        res.send("Email has been successfully verified!");
+      });
+    })
+    .catch((err) => res.status(500).send(err));
 });
 
 module.exports = router;
