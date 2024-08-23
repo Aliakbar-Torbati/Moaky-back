@@ -180,9 +180,10 @@ router.get("/verify", isAuthenticated, (req, res, next) => {
 });
 
 // GET /auth/verify-email - Used to verify the token which is sended by email to the user
-router.get("/verify-email", (req, res) => {
-  const token = req.query.token;
-
+router.get("/verifyemail", (req, res) => {
+  const { token } = req.query;
+  console.log("req.query", req.query);
+  console.log("verify-email", token);
   User.findOne({
     verificationToken: token,
     verificationTokenExpires: { $gt: Date.now() },
