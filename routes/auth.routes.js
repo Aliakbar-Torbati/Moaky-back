@@ -46,7 +46,7 @@ router.post("/signup", (req, res, next) => {
       const hashedPassword = bcrypt.hashSync(password, salt);
 
       // Create a new user in the database
-      return User.create({
+      User.create({
         email,
         password: hashedPassword,
         name,
@@ -54,8 +54,8 @@ router.post("/signup", (req, res, next) => {
         isVerified: false,
         verificationTokenExpires: Date.now() + 3600000, // Token expires in 1 hour
       });
-    })
-    .then((createdUser) => {
+    // })
+    // .then((createdUser) => {
       const transporter = nodemailer.createTransport({
         service: "Gmail",
         auth: {
@@ -160,7 +160,10 @@ router.post("/login", (req, res, next) => {
           algorithm: "HS256",
           expiresIn: "24h",
         });
-
+      // Check if the user has verifies his email
+      if (!foundUser.isVerified) {
+        return res.status(400).json({ message: "Please confirm your email by the link which is sended to your mail." });
+      }
         // Send the token as the response
         res.status(200).json({ authToken });
       } else {
