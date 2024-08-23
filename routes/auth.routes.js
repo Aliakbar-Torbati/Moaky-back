@@ -64,7 +64,7 @@ router.post("/signup", (req, res, next) => {
         },
       });
 
-      const verificationUrl = `http://localhost:5005/auth/verify-email?token=${token}`;
+      const verificationUrl = `http://localhost:5173/verify-email?token=${token}`;
 
       const mailOptions = {
         from: "alitorbati1368@gmail.com",
@@ -88,7 +88,7 @@ router.post("/signup", (req, res, next) => {
     });
 });
 
-// resending end the verification email
+// resending the verification email
 router.post("/resend-verification", (req, res) => {
   const { email } = req.body;
 
