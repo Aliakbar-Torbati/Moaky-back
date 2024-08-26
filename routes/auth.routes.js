@@ -88,45 +88,6 @@ router.post("/signup", (req, res, next) => {
     });
 });
 
-// resending the verification email
-router.post("/resend-verification", (req, res) => {
-  const { email } = req.body;
-
-  User.findOne({ email })
-    .then((user) => {
-      if (!user) {
-        return res.status(404).send("User not found.");
-      }
-      if (user.isVerified) {
-        return res.status(400).send("User is already verified.");
-      }
-
-      // Generate a new token and save it
-      const token = crypto.randomBytes(32).toString("hex");
-      user.verificationToken = token;
-      user.verificationTokenExpires = Date.now() + 3600000; // 1 hour
-
-      user.save().then(() => {
-        // Resend the verification email
-        const verificationUrl = `https://yourdomain.com/verify-email?token=${token}`;
-
-        const mailOptions = {
-          from: "your-email@gmail.com",
-          to: email,
-          subject: "Please verify your email",
-          html: `<p>Click the link below to verify your email:</p><a href="${verificationUrl}">${verificationUrl}</a>`,
-        };
-
-        transporter.sendMail(mailOptions, (error, info) => {
-          if (error) {
-            return console.log(error);
-          }
-          res.send("A new verification email has been sent.");
-        });
-      });
-    })
-    .catch((err) => res.status(500).send(err));
-});
 
 // POST /auth/login - Verifies email and password and returns a JWT
 router.post("/login", (req, res, next) => {
@@ -182,7 +143,7 @@ router.get("/verify", isAuthenticated, (req, res, next) => {
   res.status(200).json(req.payload);
 });
 
-// GET /auth/verify-email - Used to verify the token which is sended by email to the user
+// GET /auth/verifyemail - Used to verify the token which is sended by email to the user
 router.get("/verifyemail", (req, res) => {
   const { token } = req.query;
   console.log("req.query", req.query);
@@ -207,5 +168,59 @@ router.get("/verifyemail", (req, res) => {
     })
     .catch((err) => res.status(500).send(err));
 });
+
+// resending the verification email
+router.post("/reverifyemail", (req, res) => {
+  const { email } = req.body;
+
+  User.findOne({ email })
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send("User not found. You should register first!");
+      }
+      if (user.isVerified) {
+        return res.status(400).send("User is already verified. You can log in now!");
+      }
+
+      // Generate a new token and save it
+      const token = crypto.randomBytes(32).toString("hex");
+      user.verificationToken = token;
+      user.verificationTokenExpires = Date.now() + 3600000; // 1 hour
+
+      const transporter = nodemailer.createTransport({
+        service: "Gmail",
+        auth: {
+          user: "alitorbati1368@gmail.com",
+          pass: "evhu jydn prsl rnna",
+        },
+      });
+
+      user.save().then(() => {
+        // Resend the verification email
+        const verificationUrl = `http://localhost:5173/verify-email?token=${token}`;
+
+        const mailOptions = {
+          from: "alitorbati1368@gmail.com",
+          to: email,
+          subject: "Please verify your email",
+          html: `<p>Click the link below to verify your email:</p><a href="${verificationUrl}">${verificationUrl}</a>`,
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            return console.log(error);
+          }
+          res.send("A new verification email has been sent.");
+        });
+      });
+    })
+
+    // res
+    // .status(201)
+    // .json({ message: "Signup successful, verification email sent." });
+
+    .catch((err) => res.status(500).send(err));
+});
+
 
 module.exports = router;
