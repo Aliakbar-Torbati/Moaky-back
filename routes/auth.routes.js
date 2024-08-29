@@ -59,15 +59,15 @@ router.post("/signup", (req, res, next) => {
       const transporter = nodemailer.createTransport({
         service: "Gmail",
         auth: {
-          user: "alitorbati1368@gmail.com",
-          pass: "evhu jydn prsl rnna",
+          user: process.env.HOST_EMAIL,
+          pass: process.env.HOST_EMAIL_PASS,
         },
       });
 
       const verificationUrl = `http://localhost:5173/verify-email?token=${token}`;
 
       const mailOptions = {
-        from: "alitorbati1368@gmail.com",
+        from: process.env.HOST_EMAIL,
         to: email,
         subject: "Please verify your email",
         html: `<p>Click the link below to verify your email:</p><a href="${verificationUrl}">${verificationUrl}</a>`,
@@ -176,10 +176,10 @@ router.post("/reverifyemail", (req, res) => {
   User.findOne({ email })
     .then((user) => {
       if (!user) {
-        return res.status(404).send("User not found. You should register first!");
+        return res.status(404).send({message:"User not found. You should register first!"});
       }
       if (user.isVerified) {
-        return res.status(400).send("User is already verified. You can log in now!");
+        return res.status(400).send({message: "User is already verified. You can log in now!"});
       }
 
       // Generate a new token and save it
@@ -188,10 +188,11 @@ router.post("/reverifyemail", (req, res) => {
       user.verificationTokenExpires = Date.now() + 3600000; // 1 hour
 
       const transporter = nodemailer.createTransport({
+        // info@moaky.de
         service: "Gmail",
         auth: {
-          user: "alitorbati1368@gmail.com",
-          pass: "evhu jydn prsl rnna",
+          user: process.env.HOST_EMAIL,
+          pass: process.env.HOST_EMAIL_PASS,
         },
       });
 
@@ -200,7 +201,7 @@ router.post("/reverifyemail", (req, res) => {
         const verificationUrl = `http://localhost:5173/verify-email?token=${token}`;
 
         const mailOptions = {
-          from: "alitorbati1368@gmail.com",
+          from: process.env.HOST_EMAIL,
           to: email,
           subject: "Please verify your email",
           html: `<p>Click the link below to verify your email:</p><a href="${verificationUrl}">${verificationUrl}</a>`,
@@ -210,16 +211,11 @@ router.post("/reverifyemail", (req, res) => {
           if (error) {
             return console.log(error);
           }
-          res.send("A new verification email has been sent.");
+          res.status(201).send({message:"A new verification email has been sent."});
         });
       });
     })
-
-    // res
-    // .status(201)
-    // .json({ message: "Signup successful, verification email sent." });
-
-    .catch((err) => res.status(500).send(err));
+    .catch((err) => res.status(500).send({message: err }));
 });
 
 
