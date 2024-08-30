@@ -59,18 +59,18 @@ router.post("/signup", (req, res, next) => {
       const transporter = nodemailer.createTransport({
         service: "Gmail",
         auth: {
-          user: "alitorbati1368@gmail.com",
-          pass: "evhu jydn prsl rnna"
-          // user: process.env.HOST_EMAIL,
-          // pass: process.env.HOST_EMAIL_PASS,
+          // user: "alitorbati1368@gmail.com",
+          // pass: "evhu jydn prsl rnna"
+          user: process.env.HOST_EMAIL,
+          pass: process.env.HOST_EMAIL_PASS
         },
       });
 
       const verificationUrl = `http://localhost:5173/verify-email?token=${token}`;
 
       const mailOptions = {
-        from: "alitorbati1368@gmail.com",
-        // from: process.env.HOST_EMAIL,
+        // from: "alitorbati1368@gmail.com",
+        from: process.env.HOST_EMAIL,
         to: email,
         subject: "Please verify your email",
         html: `<p>Click the link below to verify your email:</p><a href="${verificationUrl}">${verificationUrl}</a>`,
