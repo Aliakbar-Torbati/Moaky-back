@@ -120,7 +120,6 @@ router.post("/login", (req, res, next) => {
 
         // Create a JSON Web Token and sign it
         const authToken = jwt.sign(payload, process.env.TOKEN_SECRET, {
-          // const authToken = jwt.sign(payload, "y0uRt0k3N$eCr3T", {
           algorithm: "HS256",
           expiresIn: "24h",
         });
@@ -194,8 +193,6 @@ router.post("/reverifyemail", (req, res) => {
         // info@moaky.de
         service: "Gmail",
         auth: {
-          // user: "alitorbati1368@gmail.com",
-          // pass: "evhu jydn prsl rnna"
           user: process.env.HOST_EMAIL,
           pass: process.env.HOST_EMAIL_PASS,
         },
@@ -206,7 +203,6 @@ router.post("/reverifyemail", (req, res) => {
         const verificationUrl = `http://localhost:5173/verify-email?token=${token}`;
 
         const mailOptions = {
-          // from: "alitorbati1368@gmail.com",
           from: process.env.HOST_EMAIL,
           to: email,
           subject: "Please verify your email",
