@@ -59,15 +59,18 @@ router.post("/signup", (req, res, next) => {
       const transporter = nodemailer.createTransport({
         service: "Gmail",
         auth: {
-          user: process.env.HOST_EMAIL,
-          pass: process.env.HOST_EMAIL_PASS,
+          user: "alitorbati1368@gmail.com",
+          pass: "evhu jydn prsl rnna"
+          // user: process.env.HOST_EMAIL,
+          // pass: process.env.HOST_EMAIL_PASS,
         },
       });
 
       const verificationUrl = `http://localhost:5173/verify-email?token=${token}`;
 
       const mailOptions = {
-        from: process.env.HOST_EMAIL,
+        from: "alitorbati1368@gmail.com",
+        // from: process.env.HOST_EMAIL,
         to: email,
         subject: "Please verify your email",
         html: `<p>Click the link below to verify your email:</p><a href="${verificationUrl}">${verificationUrl}</a>`,
@@ -117,7 +120,8 @@ router.post("/login", (req, res, next) => {
         const payload = { _id, name };
 
         // Create a JSON Web Token and sign it
-        const authToken = jwt.sign(payload, process.env.TOKEN_SECRET, {
+        // const authToken = jwt.sign(payload, process.env.TOKEN_SECRET, {
+          const authToken = jwt.sign(payload, "y0uRt0k3N$eCr3T", {
           algorithm: "HS256",
           expiresIn: "24h",
         });
@@ -191,8 +195,10 @@ router.post("/reverifyemail", (req, res) => {
         // info@moaky.de
         service: "Gmail",
         auth: {
-          user: process.env.HOST_EMAIL,
-          pass: process.env.HOST_EMAIL_PASS,
+          user: "alitorbati1368@gmail.com",
+          pass: "evhu jydn prsl rnna"
+          // user: process.env.HOST_EMAIL,
+          // pass: process.env.HOST_EMAIL_PASS,
         },
       });
 
@@ -201,7 +207,8 @@ router.post("/reverifyemail", (req, res) => {
         const verificationUrl = `http://localhost:5173/verify-email?token=${token}`;
 
         const mailOptions = {
-          from: process.env.HOST_EMAIL,
+          from: "alitorbati1368@gmail.com",
+          // from: process.env.HOST_EMAIL,
           to: email,
           subject: "Please verify your email",
           html: `<p>Click the link below to verify your email:</p><a href="${verificationUrl}">${verificationUrl}</a>`,
