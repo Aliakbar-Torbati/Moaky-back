@@ -65,7 +65,8 @@ router.post("/signup", (req, res, next) => {
         },
       });
 
-      const verificationUrl = `http://localhost:5173/verify-email?token=${token}`;
+      const FRONTEND_URL = process.env.ORIGIN || "http://localhost:5173";
+      const verificationUrl = `${FRONTEND_URL}/verify-email?token=${token}`;
 
       const mailOptions = {
 
@@ -200,7 +201,8 @@ router.post("/reverifyemail", (req, res) => {
 
       user.save().then(() => {
         // Resend the verification email
-        const verificationUrl = `http://localhost:5173/verify-email?token=${token}`;
+        const FRONTEND_URL = process.env.ORIGIN || "http://localhost:5173";
+        const verificationUrl = `${FRONTEND_URL}/verify-email?token=${token}`;
 
         const mailOptions = {
           from: process.env.HOST_EMAIL,
