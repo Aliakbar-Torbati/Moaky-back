@@ -37,6 +37,10 @@ module.exports = (app) => {
   const corsOptions = {
     origin: FRONTEND_URL,
     credentials: true, // Allow cookies and authentication
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+    allowedHeaders: "Content-Type, Authorization",
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   };
   
   // Apply CORS middleware with the options
