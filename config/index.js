@@ -14,8 +14,8 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
 // const FRONTEND_URL = process.env.ORIGIN || "http://localhost:5173";
+const FRONTEND_URL = process.env.ORIGIN;
 
-const FRONTEND_URL = "https://moaky.de";
 
 // Middleware configuration
 module.exports = (app) => {
@@ -24,11 +24,11 @@ module.exports = (app) => {
   app.set("trust proxy", 1);
 
   // controls a very specific header to pass headers from the frontend
-  // app.use(
-  //   cors({
-  //     origin: [FRONTEND_URL],
-  //   })
-  // );
+  app.use(
+    cors({
+      origin: [FRONTEND_URL],
+    })
+  );
 
   // In development environment the app logs
   app.use(logger("dev"));
