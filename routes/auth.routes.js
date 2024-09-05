@@ -66,8 +66,8 @@ router.post("/signup", (req, res, next) => {
       });
 
       const FRONTEND_URL = process.env.ORIGIN || "http://localhost:5173";
-      // const verificationUrl = `${FRONTEND_URL}/verify-email?token=${token}`;
-      const verificationUrl = `https://main--moaky.netlify.app/verify-email?token=${token}`;
+      const verificationUrl = `${FRONTEND_URL}/verify-email?token=${token}`;
+      // const verificationUrl = `https://main--moaky.netlify.app/verify-email?token=${token}`;
 
 
       const mailOptions = {
