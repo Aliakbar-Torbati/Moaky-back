@@ -8,11 +8,11 @@ require("./db");
 // Handles http requests (express is node js framework)
 // https://www.npmjs.com/package/express
 const express = require("express");
-const cors = require('cors');
+// const cors = require('cors');
 
 const app = express();
 
-// Configure CORS
+//  Configure CORS
 app.use(cors({
     origin: 'http://localhost:5173', // Allow your frontend origin
     credentials: true, // If you need to send cookies with your requests
