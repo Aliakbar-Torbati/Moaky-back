@@ -23,6 +23,9 @@ module.exports = (app) => {
   // Services like Fly use something called a proxy and you need to add this to your server
   app.set("trust proxy", 1);
 
+    // Log the origin to verify that the environment variable is correctly set
+    console.log("Frontend URL:", FRONTEND_URL);
+
   // controls a very specific header to pass headers from the frontend
   app.use(
     cors({
@@ -32,6 +35,15 @@ module.exports = (app) => {
 
   // In development environment the app logs
   app.use(logger("dev"));
+   // Improved CORS configuration
+   const corsOptions = {
+    origin: FRONTEND_URL,
+    credentials: true, // Allow cookies and authentication
+  };
+
+  // Apply CORS middleware with the options
+  app.use(cors(corsOptions));
+  
 
   // To have access to `body` property in the request
   app.use(express.json());
