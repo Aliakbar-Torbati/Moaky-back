@@ -26,6 +26,13 @@ router.post("/signup", (req, res, next) => {
     return res.status(400).json({ message: "Provide a valid email address." });
   }
 
+  // Cehck validity of password
+    // Regular expression to check for at least 6 characters, one letter, one number, and one special character
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;  
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({ message: "Password must be at least 6 characters long, and include at least one letter, one number, and one special character." });
+    }
+
   // Generate a unique verification token
   const token = crypto.randomBytes(32).toString("hex");
 
@@ -223,6 +230,5 @@ router.post("/reverifyemail", (req, res) => {
     })
     .catch((err) => res.status(500).send({message: err }));
 });
-
 
 module.exports = router;
