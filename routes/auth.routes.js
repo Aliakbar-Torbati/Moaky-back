@@ -231,4 +231,39 @@ router.post("/reverifyemail", (req, res) => {
     .catch((err) => res.status(500).send({message: err }));
 });
 
+
+// POST /auth/userinfo - add more info about user
+router.post("/userinfo", (req, res, next) => {
+  const {name, age, state, hobbies, careSituation, connectable } = req.body;
+
+  // Check the users collection if a user with the same name exists
+  User.findOne({ name })
+    .then((foundUser) => {
+      if (!foundUser) {
+        // User not found
+        return res.status(401).json({ message: "User not found." });
+      }
+
+      // Update the user information
+      foundUser.age = age || foundUser.age;
+      foundUser.state = state || foundUser.state;
+      foundUser.hobbies = hobbies || foundUser.hobbies;
+      foundUser.careSituation = careSituation || foundUser.careSituation;
+      foundUser.connectable = connectable !== undefined ? connectable : foundUser.connectable;
+
+      // Save the updated user info
+      return foundUser.save();
+    })
+    .then((updatedUser) => {
+      // Respond with success message and updated user data
+      res.status(200).json({ message: "User info updated successfully." });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ message: "Error updating user info." });
+    });
+});
+
+
+
 module.exports = router;
