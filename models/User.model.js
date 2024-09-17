@@ -19,6 +19,21 @@ const userSchema = new Schema(
       required: [true, "Username is required."],
       unique: true,
     },
+    age: {
+      type: Number,
+    },
+    state: {
+      type: String,
+    },
+    hobbies: {
+      type: String,
+    },
+    careSituation: {
+      type: String,
+    },
+    connectable: {
+      type: Boolean,
+    },
     verificationToken: {
       type: String,
     },
