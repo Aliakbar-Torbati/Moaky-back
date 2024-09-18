@@ -6,7 +6,7 @@ const ContactForm = require("../models/ContactForm.model");
 
 // POST /contact/contactform  - Creates a new message in the database
 router.post("/contactform", (req, res, next) => {
-  const { name, email, subject, message } = req.body;
+  const { name, email, subject, userMessage } = req.body;
   console.log("message sended", req.body);
 
   // Check if the required parts are provided
@@ -18,7 +18,7 @@ router.post("/contactform", (req, res, next) => {
     res.status(400).json({ message: "Provide a topic please" });
     return;
   }
-  if (message === "") {
+  if (userMessage === "") {
     res.status(400).json({ message: "insert your message please" });
     return;
   }
@@ -32,13 +32,13 @@ router.post("/contactform", (req, res, next) => {
 
       // Create the new email in the database
       // We return a pending promise, which allows us to chain another `then`
-    ContactForm.create({ name, email, subject, message })
+    ContactForm.create({ name, email, subject, userMessage })
     .then((createdmessage) => {
       // Deconstruct the newly created email
-      const { name, email, subject, message } = createdmessage;
+      const { name, email, subject, userMessage } = createdmessage;
 
       // Create a new object
-      const newSubject = { subject };
+      const newSubject = { name, email, subject, userMessage };
 
       // Send a json response containing the subject
       res.status(201).json({ newSubject: newSubject });

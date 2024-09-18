@@ -8,17 +8,17 @@ const contactFromSchema = new Schema(
       },
       email: {
         type: String,
-        required: [true, "Email is required."],
+        required: [true, "E-Mail ist erforderlich."],
         lowercase: true,
         trim: true,
       },
       subject: {
         type: String,
-        required: [true, "Email is required."],
+        required: [true, "Subject ist erforderlich."],
       },
     message: {
       type: String,
-      required: [true, "Email is required."],
+      required: [true, "Schreiben Sie Ihre Nachricht bitte."],
     }
   },
   {
