@@ -123,10 +123,11 @@ router.post("/login", (req, res, next) => {
 
       if (passwordCorrect) {
         // Deconstruct the user object to omit the password
-        const { _id, email, name } = foundUser;
+        const { _id, name, age, careSituation, state, hobbies, connectable  } = foundUser;
 
         // Create an object that will be set as the token payload
-        const payload = { _id, name };
+        const payload = { _id, name, age, careSituation, state, hobbies, connectable };
+        // const payload = { _id, name };
 
         // Create a JSON Web Token and sign it
         const authToken = jwt.sign(payload, process.env.TOKEN_SECRET, {
@@ -151,8 +152,23 @@ router.get("/verify", isAuthenticated, (req, res, next) => {
   // The payload is available on `req.payload` because `isAuthenticated` middleware decoded the token
   console.log("verify", req.payload);
 
-  // Send back the token payload object containing the user data
-  res.status(200).json(req.payload);
+  const userId = req.payload._id;
+
+  // Fetch the full user data from the database
+  User.findById(userId)
+    .then((foundUser) => {
+      if (!foundUser) {
+        return res.status(404).json({ message: "User not found." });
+      }
+
+      // Send full user data (excluding sensitive fields like password)
+      const { _id, name, age, state, careSituation, hobbies, connectable } = foundUser;
+      res.status(200).json({ _id, name, age, state, careSituation, hobbies, connectable });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ message: "Error retrieving user data." });
+    });
 });
 
 // GET /auth/verifyemail - Used to verify the token which is sended by email to the user
