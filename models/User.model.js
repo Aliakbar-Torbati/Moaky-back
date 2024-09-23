@@ -32,7 +32,7 @@ const userSchema = new Schema(
       type: String,
     },
     connectable: {
-      type: Boolean,
+      type: String,
     },
     verificationToken: {
       type: String,

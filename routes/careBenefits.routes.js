@@ -2,12 +2,12 @@ const express = require("express");
 const router = express.Router();
 
 // Require a model in order to interact with the database
-const NewsletterEmail = require("../models/Newsletter.model");
+const CareBenefitsModel = require("../models/CareBenefits.model");
 
 // POST /newsletter/signup  - Creates a new email in the database
 router.post("/signup", (req, res, next) => {
-  const { email } = req.body;
-  console.log("newsletter email added",req.body);
+  const { email , carebenefit } = req.body;
+  console.log("email and carebenefit added",req.body);
   
 
   // Check if email is provided as empty strings
@@ -24,7 +24,7 @@ router.post("/signup", (req, res, next) => {
   }
 
   // Check the emails collection if a user with the same email already exists
-  NewsletterEmail.findOne({ email })
+  CareBenefitsModel.findOne({ email })
     .then((foundEmail) => {
       // If the email already exists, send an error response
       if (foundEmail) {
@@ -34,17 +34,17 @@ router.post("/signup", (req, res, next) => {
 
       // Create the new email in the database
       // We return a pending promise, which allows us to chain another `then`
-      return NewsletterEmail.create({ email });
+      return CareBenefitsModel.create({ email , carebenefit });
     })
-    .then((createdEmail) => {
+    .then((createdCareBenefit) => {
       // Deconstruct the newly created email
-      const { email } = createdEmail;
+      const { email ,carebenefit } = createdCareBenefit;
 
       // Create a new object
-      const newEmail = { email };
+      const newCareBenefit = { email , carebenefit };
 
       // Send a json response containing the email object
-      res.status(201).json({ newEmail: newEmail });
+      res.status(201).json({ newCareBenefit: newCareBenefit });
     })
     .catch((err) => next(err)); // In this case, we send error handling to the error handling middleware.
 });
