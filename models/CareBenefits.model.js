@@ -10,7 +10,7 @@ const careBenefitsSchema = new Schema(
       lowercase: true,
       trim: true,
     },
-    carebenefit: {
+    selectedOption: {
         type: String,
         required: true
       }

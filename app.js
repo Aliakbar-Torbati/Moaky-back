@@ -26,7 +26,7 @@ app.use("/auth", authRoutes);
 const newsletterEmailsRoutes = require("./routes/newsletterEmails.routes.js");
 app.use("/newsletter", newsletterEmailsRoutes);
 
-const careBenefitsRoutes = require("./routes/newsletterEmails.routes.js");
+const careBenefitsRoutes = require("./routes/careBenefits.routes.js");
 app.use("/carebenefits", careBenefitsRoutes);
 
 const contactFormRoutes = require("./routes/contactForm.routes.js");
