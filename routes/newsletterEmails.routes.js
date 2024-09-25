@@ -12,14 +12,14 @@ router.post("/signup", (req, res, next) => {
 
   // Check if email is provided as empty strings
   if (email === "") {
-    res.status(400).json({ message: "Provide an email please" });
+    res.status(400).json({ message: "Geben Sie bitte eine E-Mail an." });
     return;
   }
 
   // This regular expression check that the email is of a valid format
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   if (!emailRegex.test(email)) {
-    res.status(400).json({ message: "Provide a valid email address." });
+    res.status(400).json({ message: "Geben Sie eine gültige E-Mail-Adresse an." });
     return;
   }
 
@@ -28,7 +28,7 @@ router.post("/signup", (req, res, next) => {
     .then((foundEmail) => {
       // If the email already exists, send an error response
       if (foundEmail) {
-        res.status(400).json({ message: "This email already exists." });
+        res.status(200).json({ message: "Die E-Mail wurde erfolgreich versendet." });
         return;
       }
 
