@@ -17,20 +17,20 @@ router.post("/signup", (req, res, next) => {
   if (email === "" || password === "" || name === "") {
     return res
       .status(400)
-      .json({ message: "Provide email, password, and name" });
+      .json({ message: "Bitte geben Sie E-Mail, Passwort und Benutzernamen ein." });
   }
 
   // Regular expression to check if the email is in a valid format
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   if (!emailRegex.test(email)) {
-    return res.status(400).json({ message: "Provide a valid email address." });
+    return res.status(400).json({ message: "Geben Sie eine gültige E-Mail-Adresse an." });
   }
 
   // Cehck validity of password
     // Regular expression to check for at least 6 characters, one letter, one number, and one special character
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;  
     if (!passwordRegex.test(password)) {
-      return res.status(400).json({ message: "Password must be at least 6 characters long, and include at least one letter, one number, and one special character." });
+      return res.status(400).json({ message: "Das Passwort muss mindestens 6 Zeichen lang sein und mindestens einen Buchstaben, eine Zahl und ein Sonderzeichen enthalten." });
     }
 
   // Generate a unique verification token
@@ -42,9 +42,9 @@ router.post("/signup", (req, res, next) => {
       if (foundUser) {
         // Email or username already exists
         if (foundUser.email === email) {
-          return res.status(400).json({ message: "Email already exists." });
+          return res.status(400).json({ message: "Diese E-Mail ist bereits vorhanden." });
         } else if (foundUser.name === name) {
-          return res.status(400).json({ message: "Username already exists." });
+          return res.status(400).json({ message: "Dieser Benutzername ist bereits vorhanden. Bitte verwenden Sie einen anderen." });
         }
       }
 
@@ -81,8 +81,8 @@ router.post("/signup", (req, res, next) => {
 
         from: process.env.HOST_EMAIL,
         to: email,
-        subject: "Please verify your email",
-        html: `<p>Click the link below to verify your email:</p><a href="${verificationUrl}">${verificationUrl}</a>`,
+        subject: "Bitte bestätigen Sie Ihre E-Mail",
+        html: `Vielen Dank für Ihre Registrierung bei Moaky. Klicken Sie auf den Link unten, um Ihre E-Mail-Adresse zu bestätigen. </p><a href="${verificationUrl}">${verificationUrl}</a>`,
       };
 
       // Send the verification email
@@ -92,10 +92,10 @@ router.post("/signup", (req, res, next) => {
       console.log("Verification email sent successfully.");
       res
         .status(201)
-        .json({ message: "Signup successful, verification email sent." });
+        .json({ message: "Anmeldung erfolgreich, Bestätigungs-E-Mail gesendet." });
     })
     .catch((err) => {
-      console.error("Error during signup or email sending:", err);
+      console.error("Fehler bei der Anmeldung oder beim Senden der E-Mail:", err);
       next(err); // In this case, we send error handling to the error handling middleware.
     });
 });
@@ -107,7 +107,7 @@ router.post("/login", (req, res, next) => {
 
   // Check if email or password are provided as empty strings
   if (email === "" || password === "") {
-    return res.status(400).json({ message: "Provide email and password." });
+    return res.status(400).json({ message: "Geben Sie E-Mail und Passwort ein." });
   }
 
   // Check the users collection if a user with the same email exists
@@ -115,7 +115,7 @@ router.post("/login", (req, res, next) => {
     .then((foundUser) => {
       if (!foundUser) {
         // User not found
-        return res.status(401).json({ message: "User not found." });
+        return res.status(401).json({ message: "E-Mail oder Passwort sind falsch!" });
       }
 
       // Compare the provided password with the one saved in the database
@@ -136,12 +136,12 @@ router.post("/login", (req, res, next) => {
         });
       // Check if the user has verifies his email
       if (!foundUser.isVerified) {
-        return res.status(400).json({ message: "Please confirm your email by the link which is sended to your mail." });
+        return res.status(400).json({ message: "Bitte bestätigen Sie Ihre E-Mail über den Link, der an Ihre E-Mail gesendet wird." });
       }
         // Send the token as the response
         res.status(200).json({ authToken });
       } else {
-        res.status(401).json({ message: "Unable to authenticate the user." });
+        res.status(401).json({ message: "E-Mail oder Passwort sind falsch!" });
       }
     })
     .catch((err) => next(err)); // Error handling
@@ -158,7 +158,7 @@ router.get("/verify", isAuthenticated, (req, res, next) => {
   User.findById(userId)
     .then((foundUser) => {
       if (!foundUser) {
-        return res.status(404).json({ message: "User not found." });
+        return res.status(404).json({ message: "Benutzer nicht gefunden." });
       }
 
       // Send full user data (excluding sensitive fields like password)
@@ -167,7 +167,7 @@ router.get("/verify", isAuthenticated, (req, res, next) => {
     })
     .catch((err) => {
       console.error(err);
-      res.status(500).json({ message: "Error retrieving user data." });
+      res.status(500).json({ message: "Fehler beim Abrufen der Benutzerdaten." });
     });
 });
 
@@ -182,7 +182,7 @@ router.get("/verifyemail", (req, res) => {
   })
     .then((user) => {
       if (!user) {
-        return res.status(400).send("Token is invalid or has expired.");
+        return res.status(400).send("Token ist ungültig oder abgelaufen.");
       }
 
       // Mark the user as verified
@@ -191,7 +191,7 @@ router.get("/verifyemail", (req, res) => {
       user.verificationTokenExpires = undefined; // Clear the expiration
 
       user.save().then(() => {
-        res.send("Email has been successfully verified!");
+        res.send("E-Mail wurde erfolgreich verifiziert!");
       });
     })
     .catch((err) => res.status(500).send(err));
@@ -204,10 +204,10 @@ router.post("/reverifyemail", (req, res) => {
   User.findOne({ email })
     .then((user) => {
       if (!user) {
-        return res.status(404).send({message:"User not found. You should register first!"});
+        return res.status(404).send({message:"Benutzer nicht gefunden. Du solltest dich zuerst registrieren!"});
       }
       if (user.isVerified) {
-        return res.status(400).send({message: "User is already verified. You can log in now!"});
+        return res.status(400).send({message: "Der Benutzer ist bereits verifiziert. Sie können sich jetzt anmelden!"});
       }
 
       // Generate a new token and save it
@@ -232,15 +232,15 @@ router.post("/reverifyemail", (req, res) => {
         const mailOptions = {
           from: process.env.HOST_EMAIL,
           to: email,
-          subject: "Please verify your email",
-          html: `<p>Click the link below to verify your email:</p><a href="${verificationUrl}">${verificationUrl}</a>`,
+          subject: "Bitte bestätigen Sie Ihre E-Mail",
+          html: `<p>Vielen Dank für Ihre Registrierung bei Moaky. Klicken Sie auf den Link unten, um Ihre E-Mail-Adresse zu bestätigen. </p><a href="${verificationUrl}">${verificationUrl}</a>`,
         };
 
         transporter.sendMail(mailOptions, (error, info) => {
           if (error) {
             return console.log(error);
           }
-          res.status(201).send({message:"A new verification email has been sent."});
+          res.status(201).send({message:"Eine neue Bestätigungs-E-Mail wurde gesendet."});
         });
       });
     })
@@ -257,7 +257,7 @@ router.post("/userinfo", (req, res, next) => {
     .then((foundUser) => {
       if (!foundUser) {
         // User not found
-        return res.status(401).json({ message: "User not found." });
+        return res.status(401).json({ message: "Benutzer nicht gefunden." });
       }
 
       // Update the user information
@@ -272,11 +272,11 @@ router.post("/userinfo", (req, res, next) => {
     })
     .then((updatedUser) => {
       // Respond with success message and updated user data
-      res.status(200).json({ message: "User info updated successfully." });
+      res.status(200).json({ message: "Benutzerinformationen erfolgreich aktualisiert." });
     })
     .catch((err) => {
       console.error(err);
-      res.status(500).json({ message: "Error updating user info." });
+      res.status(500).json({ message: "Fehler beim Aktualisieren der Benutzerinformationen." });
     });
 });
 
