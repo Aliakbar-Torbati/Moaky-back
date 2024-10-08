@@ -11,7 +11,7 @@ const saltRounds = 10;
 
 // POST /auth/signup - Creates a new user in the database
 router.post("/signup", (req, res, next) => {
-  const { email, password, name } = req.body;
+  const { email, password, name , isServiceProvider } = req.body;
 
   // Check if email, password, or name are provided as empty strings
   if (email === "" || password === "" || name === "") {
@@ -59,6 +59,7 @@ router.post("/signup", (req, res, next) => {
         name,
         verificationToken: token,
         isVerified: false,
+        isServiceProvider: isServiceProvider,
         verificationTokenExpires: Date.now() + 3600000, // Token expires in 1 hour
       });
     // })
@@ -162,8 +163,8 @@ router.get("/verify", isAuthenticated, (req, res, next) => {
       }
 
       // Send full user data (excluding sensitive fields like password)
-      const { _id, name, age, state, careSituation, hobbies, connectable } = foundUser;
-      res.status(200).json({ _id, name, age, state, careSituation, hobbies, connectable });
+      const { _id, name, age, state, careSituation, hobbies, connectable , isServiceProvider } = foundUser;
+      res.status(200).json({ _id, name, age, state, careSituation, hobbies, connectable , isServiceProvider });
     })
     .catch((err) => {
       console.error(err);

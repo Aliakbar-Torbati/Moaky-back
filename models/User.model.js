@@ -40,6 +40,9 @@ const userSchema = new Schema(
     isVerified: {
       type: Boolean,
     },
+    isServiceProvider: {
+      type: Boolean,
+    },
     verificationTokenExpires: {
       type: Number,
     },
